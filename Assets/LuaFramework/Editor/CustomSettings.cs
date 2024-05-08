@@ -204,13 +204,10 @@ public static class CustomSettings
         _GT(typeof(AppConst)),
         _GT(typeof(LuaHelper)),
         _GT(typeof(ByteBuffer)),
-        _GT(typeof(LuaBehaviour)),
 
         _GT(typeof(GameManager)),
         _GT(typeof(LuaManager)),
-        _GT(typeof(PanelManager)),
         _GT(typeof(SoundManager)),
-        _GT(typeof(TimerManager)),
         _GT(typeof(ThreadManager)),
         _GT(typeof(NetworkManager)),
         _GT(typeof(ResourceManager)),		  
