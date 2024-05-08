@@ -75,13 +75,14 @@ public class DelegateType
     }
 }
 
-public static class ToLuaExport 
+public static class ToLuaExport
 {
     public static string className = string.Empty;
     public static Type type = null;
     public static Type baseType = null;
-        
-    public static bool isStaticClass = true;    
+    public static string wrapFileExtions = "Wrap.cs";
+
+    public static bool isStaticClass = true;
 
     static HashSet<string> usingList = new HashSet<string>();
     static MetaOp op = MetaOp.None;    
@@ -112,6 +113,7 @@ public static class ToLuaExport
     public static HashSet<Type> eventSet = new HashSet<Type>();
     public static List<Type> extendList = new List<Type>();    
 
+    //需要过滤掉的成员变量或函数
     public static List<string> memberFilter = new List<string>
     {
         "String.Chars",
@@ -135,6 +137,7 @@ public static class ToLuaExport
         "Light.lightmapBakeType",
 		"Light.shadowAngle",
 		"Light.shadowRadius",
+		"Light.SetLightDirty",
 		"Security.GetChainOfTrustValue",
         "Texture2D.alphaIsTransparency",
         "WWW.movie",
@@ -152,7 +155,20 @@ public static class ToLuaExport
         "MonoBehaviour.runInEditMode",
         "TextureFormat.DXT1Crunched",
         "TextureFormat.DXT5Crunched",
+        "TextureFormat.ETC_RGB4Crunched",
+        "TextureFormat.ETC2_RGBA8Crunched",
         "Texture.imageContentsHash",
+        "QualitySettings.streamingMipmapsMaxLevelReduction",
+        "QualitySettings.streamingMipmapsRenderersPerFrame",
+        "QualitySettings.GetAllRenderPipelineAssetsForPlatform",
+        "Input.location",
+        "Debug.ExtractStackTraceNoAlloc",
+        "MeshRenderer.scaleInLightmap",
+        "MeshRenderer.receiveGI",
+        "MeshRenderer.stitchLightmapSeams",
+        "MeshRenderer.scaleInLightmap",
+        "ParticleSystemRenderer.supportsMeshInstancing",
+
         //NGUI
         "UIInput.ProcessEvent",
         "UIWidget.showHandlesWithMoveTool",
@@ -161,7 +177,71 @@ public static class ToLuaExport
         "UIDrawCall.isActive",
         "Dictionary.TryAdd",
         "KeyValuePair.Deconstruct",
-        "ParticleSystem.SetJob"
+        "ParticleSystem.SetJob",
+        "ParticleSystem.subEmitters", /*2019.09 ios编译出错，也可能是unity版本问题*/
+        "Type.IsSZArray",
+        "ParticleSystemForceField.FindAll",
+       // "Shader.EnableKeyword",
+        //"Shader.DisableKeyword",
+        "Shader.IsKeywordEnabled",
+        "Shader.SetKeyword",
+        //"Material.EnableKeyword",
+        //"Material.DisableKeyword",
+        "Material.SetKeyword",
+        "Material.IsKeywordEnabled",
+        "Screen.MoveMainWindowTo",
+        "LineRenderer.GetPositions",
+        "ParticleSystem.SetParticles",
+        "ParticleSystem.GetParticles",
+        "TimeSpan.Parse",
+        "TimeSpan.ParseExact",
+        "TimeSpan.TryParse",
+        "TimeSpan.ParseExact",
+        "TimeSpan.TryParseExact",
+        "TimeSpan.TryFormat",
+        "DateTime.Parse",
+        "DateTime.ParseExact",
+        "DateTime.TryFormat",
+        "DateTime.TryParse",
+        "DateTime.TryParseExact",
+
+        "Type.MakeGenericSignatureType",
+        "Type.IsCollectible",
+        //"DateTime.Parse",
+        //"ParticleSystem.SetParticles",
+
+        "AudioSource.gamepadSpeakerOutputType",
+        "AudioSource.GamepadSpeakerSupportsOutputType",
+        "AudioSource.DisableGamepadOutput",
+        "AudioSource.PlayOnGamepad",
+        "AudioSource.SetGamepadSpeakerMixLevel",
+        "AudioSource.SetGamepadSpeakerMixLevelDefault",
+        "AudioSource.SetGamepadSpeakerRestrictedAudio",
+        "TrailRenderer.GetPositions",
+        "TrailRenderer.AddPositions",
+        "Random.NextBytes",
+
+        "MediaPlayer.EditorUpdate",
+        "MediaPlayer.EditorAllPlayersDispose",
+        "MediaPlayer.GetPlatformOptions",
+        "MediaPlayer.GetPlatformOptionsVariable",
+        "MediaPlayer.SaveFrameToPng",
+        "MediaPlayer.SaveFrameToExr",
+        "MediaPlayer.InternalMediaLoadedEvent",
+        "MediaPlayer.InternalMediaLoadedEvent",
+
+        "HTTPRequest.WithCredentials",
+        "HTTPRequest.ProxyResponse",
+        "HTTPRequest.HasProxy",
+        "HTTPRequest.Proxy",
+    };
+
+    //只需要的成员变量或函数（不引用相关代码方便unity的代码剥离）
+    public static Dictionary<string, HashSet<string>> memberOnlyFilter = new Dictionary<string, HashSet<string>>
+    {
+        { "ImageConversion", new HashSet<string>{
+            "EncodeToJPG",
+        } },
     };
 
     class _MethodBase
@@ -245,7 +325,7 @@ public static class ToLuaExport
             {
                 list2.Add(type);
             }
-            
+
             for (int i = 0; i < args.Length; i++)
             {
                 list1.Add(GetParameterType(args[i]));
@@ -288,19 +368,15 @@ public static class ToLuaExport
                     continue;
                 }
 
-                if (args[i].Attributes != ParameterAttributes.Out)
+                if (args[i].ParameterType.IsByRef && (args[i].Attributes & ParameterAttributes.Out) != ParameterAttributes.None)
                 {
-                    list.Add(GetGenericBaseType(method, args[i].ParameterType));
+                    Type genericClass = typeof(LuaOut<>);
+                    Type t = genericClass.MakeGenericType(args[i].ParameterType.GetElementType());
+                    list.Add(t);
                 }
                 else
                 {
-                    Type genericClass = typeof(LuaOut<>);
-
-                    var argEleType = args[i].ParameterType.GetElementType();
-                    if (argEleType != null) {
-                        Type t = genericClass.MakeGenericType(argEleType);
-                        list.Add(t);
-                    }
+                    list.Add(GetGenericBaseType(method, args[i].ParameterType));
                 }
             }
 
@@ -400,7 +476,7 @@ public static class ToLuaExport
 
         public int ProcessParams(int tab, bool beConstruct, int checkTypePos)
         {
-            ParameterInfo[] paramInfos = args;                        
+            ParameterInfo[] paramInfos = args;
 
             if (BeExtend)
             {
@@ -463,8 +539,8 @@ public static class ToLuaExport
             for (int j = 0; j < count; j++)
             {
                 ParameterInfo param = paramInfos[j];
-                string arg = "arg" + j;
-                bool beOutArg = param.Attributes == ParameterAttributes.Out;
+                string arg = "arg" + j; 
+                bool beOutArg = param.ParameterType.IsByRef && ((param.Attributes & ParameterAttributes.Out) != ParameterAttributes.None);
                 bool beParams = IsParams(param);
                 Type t = GetGenericBaseType(method, param.ParameterType);
                 ProcessArg(t, head, arg, offset + j, j >= checkTypePos, beParams, beOutArg);
@@ -474,15 +550,19 @@ public static class ToLuaExport
             {
                 ParameterInfo param = paramInfos[j];
 
-                if (!param.ParameterType.IsByRef)
+                if (!param.ParameterType.IsByRef || ((param.Attributes & ParameterAttributes.In) != ParameterAttributes.None))
                 {
                     sbArgs.Append("arg");
                 }
                 else
                 {
-                    if (param.Attributes == ParameterAttributes.Out)
+                    if ((param.Attributes & ParameterAttributes.Out) != ParameterAttributes.None)
                     {
                         sbArgs.Append("out arg");
+                    }
+                   else   if (param.Attributes == ParameterAttributes.In)
+                    {
+                        sbArgs.Append("arg");
                     }
                     else
                     {
@@ -634,14 +714,36 @@ public static class ToLuaExport
         }
     }
 
-	public static List<MemberInfo> memberInfoFilter = new List<MemberInfo>
+    public static List<MemberInfo> memberInfoFilter = new List<MemberInfo>
 	{
         //可精确查找一个函数
-		//Type.GetMethod(string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers);
+		//Type.GetMethod(string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers);		
     };
 
     public static bool IsMemberFilter(MemberInfo mi)
     {
+        if (memberOnlyFilter.ContainsKey(type.Name))
+        {
+            return !memberOnlyFilter[type.Name].Contains(mi.Name);
+        }
+		if (type.IsGenericType)
+		{
+			Type genericType = type.GetGenericTypeDefinition();
+
+			if (genericType == typeof(Dictionary<,>) && mi.Name == "Remove")
+			{
+				MethodBase mb = (MethodBase)mi;
+				return mb.GetParameters().Length == 2;
+			}
+
+			if (genericType == typeof(Dictionary<,>) || genericType == typeof(KeyValuePair<,>))
+			{
+				string str = genericType.Name;				
+				str = str.Substring(0, str.IndexOf("`"));
+				return memberFilter.Contains(str + "." + mi.Name);
+			}			
+		}
+
 		return memberInfoFilter.Contains(mi) || memberFilter.Contains(type.Name + "." + mi.Name);
     }
 
@@ -721,7 +823,7 @@ public static class ToLuaExport
 
     //操作符函数无法通过继承metatable实现
     static void GenBaseOpFunction(List<_MethodBase> list)
-    {        
+    {
         Type baseType = type.BaseType;
 
         while (baseType != null)
@@ -773,7 +875,7 @@ public static class ToLuaExport
         if (type.IsEnum)
         {
             BeginCodeGen();
-            GenEnum();                                    
+            GenEnum();
             EndCodeGen(dir);
             return;
         }
@@ -829,7 +931,7 @@ public static class ToLuaExport
     }
 
     static void BeginCodeGen()
-    {
+    { 
         sb.AppendFormat("public class {0}Wrap\r\n", wrapClassName);
         sb.AppendLineEx("{");
     }
@@ -1077,6 +1179,33 @@ public static class ToLuaExport
         using (StreamWriter textWriter = new StreamWriter(file, false, Encoding.UTF8))
         {            
             StringBuilder usb = new StringBuilder();
+
+            List<string> _symbols = null; //宏定义
+            if (wrapClassName != null)
+            {
+                foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos)
+                {
+                    if (entry.Value.Contains(wrapClassName))
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    usb.Append("#if ");
+                    for (int i = 0; i < _symbols.Count; i++)
+                    {
+                        usb.Append(_symbols[i]);
+                        if (i != _symbols.Count - 1)
+                        {
+                            usb.Append(" && ");
+                        }
+                    }
+                    usb.AppendLine();
+                }
+            }
+
             usb.AppendLineEx("//this source code was auto-generated by tolua#, do not modify it");
 
             foreach (string str in usingList)
@@ -1092,6 +1221,14 @@ public static class ToLuaExport
             }
 
             usb.AppendLineEx();
+
+            if (wrapClassName != null)
+            {
+                if (_symbols != null)
+                {
+                    sb.AppendLine("#endif");
+                }
+            }
 
             textWriter.Write(usb.ToString());
             textWriter.Write(sb.ToString());
@@ -1194,6 +1331,37 @@ public static class ToLuaExport
 
             string name = GetMethodName(m.Method);
 
+            List<string> _symbols = null;
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    string[] parts = s_key.Split(',');
+                    if (parts.Length == 2 && parts[0] == className && parts[1] == name)
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                sb.Append("#if ");
+                for (int j = 0; j < _symbols.Count; j++)
+                {
+                    sb.Append(_symbols[j]);
+                    if (j != _symbols.Count - 1)
+                    {
+                        sb.Append(" && ");
+                    }
+                }
+                sb.AppendLine();
+            }
+
             if (!nameCounter.TryGetValue(name, out count))
             {
                 if (name == "get_Item" && IsThisArray(m.Method, 1))
@@ -1215,6 +1383,11 @@ public static class ToLuaExport
             else
             {
                 nameCounter[name] = count + 1;
+            }
+
+            if (_symbols != null)
+            {
+                sb.AppendLine("#endif");
             }
         }
 
@@ -1295,6 +1468,37 @@ public static class ToLuaExport
 
         for (int i = 0; i < fields.Length; i++)
         {
+            List<string> _symbols = null;
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    string[] parts = s_key.Split(',');
+                    if (parts.Length == 2 && parts[0] == className && parts[1] == fields[i].Name)
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                sb.Append("#if ");
+                for (int j = 0; j < _symbols.Count; j++)
+                {
+                    sb.Append(_symbols[j]);
+                    if (j != _symbols.Count - 1)
+                    {
+                        sb.Append(" && ");
+                    }
+                }
+                sb.AppendLine();
+            }
+
             if (fields[i].IsLiteral || fields[i].IsPrivate || fields[i].IsInitOnly)
             {
                 if (fields[i].IsLiteral && fields[i].FieldType.IsPrimitive && !fields[i].FieldType.IsEnum)
@@ -1311,10 +1515,46 @@ public static class ToLuaExport
             {
                 sb.AppendFormat("\t\tL.RegVar(\"{0}\", get_{0}, set_{0});\r\n", fields[i].Name);
             }
-        }
 
+            if (_symbols != null)
+            {
+                sb.AppendLine("#endif");
+            }
+        }
+                    
         for (int i = 0; i < props.Length; i++)
-        {
+        {   
+            List<string> _symbols = null;
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    string[] parts = s_key.Split(',');
+                    if (parts.Length == 2 && parts[0] == className && parts[1] == props[i].Name)
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null) 
+                {
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                sb.Append("#if ");
+                for (int j = 0; j < _symbols.Count; j++)
+                {
+                    sb.Append(_symbols[j]);
+                    if (j != _symbols.Count - 1)
+                    {
+                        sb.Append(" && ");
+                    }
+                }
+                sb.AppendLine();
+            }
+
             if (props[i].CanRead && props[i].CanWrite && props[i].GetSetMethod(true).IsPublic)
             {
                 _MethodBase md = methods.Find((p) => { return p.Name == "get_" + props[i].Name; });
@@ -1333,11 +1573,52 @@ public static class ToLuaExport
                 _MethodBase md = methods.Find((p) => { return p.Name == "set_" + props[i].Name; });
                 sb.AppendFormat("\t\tL.RegVar(\"{0}\", null, {1}_{0});\r\n", props[i].Name, md == null ? "set" : "_set");
             }
+
+            if (_symbols != null)
+            {
+                sb.AppendLine("#endif");
+            }
         }
 
         for (int i = 0; i < events.Length; i++)
         {
+            List<string> _symbols = null;
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    string[] parts = s_key.Split(',');
+                    if (parts.Length == 2 && parts[0] == className && parts[1] == events[i].Name)
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                sb.Append("#if ");
+                for (int j = 0; j < _symbols.Count; j++)
+                {
+                    sb.Append(_symbols[j]);
+                    if (j != _symbols.Count - 1)
+                    {
+                        sb.Append(" && ");
+                    }
+                }
+                sb.AppendLine();
+            }
+
             sb.AppendFormat("\t\tL.RegVar(\"{0}\", get_{0}, set_{0});\r\n", events[i].Name);
+
+            if (_symbols != null)
+            {
+                sb.AppendLine("#endif");
+            }
         }
     }
 
@@ -1363,7 +1644,43 @@ public static class ToLuaExport
             abr = abr == null ? funcName : abr;
             funcName = ConvertToLibSign(space) + "_" + funcName;
 
+            List<string> _symbols = null;
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    string[] parts = s_key.Split(',');
+                    if (parts.Length == 2 && parts[0] == className && parts[1] == abr)
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                sb.Append("#if ");
+                for (int j = 0; j < _symbols.Count; j++)
+                {
+                    sb.Append(_symbols[j]);
+                    if (j != _symbols.Count - 1)
+                    {
+                        sb.Append(" && ");
+                    }
+                }
+                sb.AppendLine();
+            }
+
             sb.AppendFormat("\t\tL.RegFunction(\"{0}\", {1});\r\n", abr, funcName);
+
+            if (_symbols != null)
+            {
+                sb.AppendLine("#endif");
+            }
         }
 
         for (int i = 0; i < list.Count; i++)
@@ -1379,7 +1696,7 @@ public static class ToLuaExport
 
         if (isStaticClass)
         {
-            sb.AppendFormat("\t\tL.BeginStaticLibs(\"{0}\");\r\n", libClassName);            
+            sb.AppendFormat("\t\tL.BeginStaticLibs(\"{0}\");\r\n", libClassName);
         }
         else if (!type.IsGenericType)
         {
@@ -1568,6 +1885,37 @@ public static class ToLuaExport
 
             string name = GetMethodName(m.Method);
 
+            List<string> _symbols = null;
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    string[] parts = s_key.Split(',');
+                    if (parts.Length == 2 && parts[0] == className && parts[1] == name)
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                sb.Append("#if ");
+                for (int j = 0; j < _symbols.Count; j++)
+                {
+                    sb.Append(_symbols[j]);
+                    if (j != _symbols.Count - 1)
+                    {
+                        sb.Append(" && ");
+                    }
+                }
+                sb.AppendLine();
+            }
+
             if (nameCounter[name] > 1)
             {
                 if (!set.Contains(name))
@@ -1589,9 +1937,14 @@ public static class ToLuaExport
                     continue;
                 }
             }
-            
+
             set.Add(name);
             GenFunction(m);
+
+            if (_symbols != null)
+            {
+                sb.AppendLine("#endif");
+            }
         }
     }
 
@@ -1724,32 +2077,32 @@ public static class ToLuaExport
         return count;
     }
 
-    static void InitCtorList()
-    {
-        if (isStaticClass || type.IsAbstract || typeof(MonoBehaviour).IsAssignableFrom(type))
-        {
+	static void InitCtorList()
+	{
+		if (isStaticClass || type.IsAbstract || typeof(MonoBehaviour).IsAssignableFrom(type))
+		{
+			return;
+		}
+
+		ConstructorInfo[] constructors = type.GetConstructors(BindingFlags.Instance | binding);
+
+		if (extendType != null)
+		{
+			ConstructorInfo[] ctorExtends = extendType.GetConstructors(BindingFlags.Instance | binding);
+
+			if (HasAttribute(ctorExtends[0], typeof(UseDefinedAttribute)))
+			{
+				ctorExtList.AddRange(ctorExtends);
+			}
+		}
+
+		if (constructors.Length == 0)
+		{
             return;
         }
-
-        ConstructorInfo[] constructors = type.GetConstructors(BindingFlags.Instance | binding);
-
-        if (extendType != null)
-        {
-            ConstructorInfo[] ctorExtends = extendType.GetConstructors(BindingFlags.Instance | binding);
-
-            if (HasAttribute(ctorExtends[0], typeof(UseDefinedAttribute)))
-            {
-                ctorExtList.AddRange(ctorExtends);
-            }
-        }
-
-        if (constructors.Length == 0)
-        {
-            return;
-        }        
 
         for (int i = 0; i < constructors.Length; i++)
-        {                        
+        {
             if (IsObsolete(constructors[i]))
             {
                 continue;
@@ -1781,6 +2134,37 @@ public static class ToLuaExport
 
     static void GenConstructFunction()
     {
+        List<string> _symbols = null;
+        foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+        {
+            foreach (string s_key in entry.Value)
+            {
+                string[] parts = s_key.Split(',');
+                if (parts.Length == 2 && parts[0] == className && parts[1] == extendName)
+                {
+                    _symbols = entry.Key;
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                break;
+            }
+        }
+        if (_symbols != null)
+        {
+            sb.Append("#if ");
+            for (int j = 0; j < _symbols.Count; j++)
+            {
+                sb.Append(_symbols[j]);
+                if (j != _symbols.Count - 1)
+                {
+                    sb.Append(" && ");
+                }
+            }
+            sb.AppendLine();
+        }
+
         if (ctorExtList.Count  > 0)
         {
             if (HasAttribute(ctorExtList[0], typeof(UseDefinedAttribute)))
@@ -1915,6 +2299,11 @@ public static class ToLuaExport
                         
         EndTry();
         sb.AppendLineEx("\t}");
+
+        if (_symbols != null)
+        {
+            sb.AppendLine("#endif");
+        }
     }
 
 
@@ -2096,6 +2485,10 @@ public static class ToLuaExport
                 {
                     return 1;
                 }
+                else if (list1[0].ParameterType.IsPrimitive)
+                {
+                    return -1;
+                }
 
                 list1.RemoveAt(0);
             }
@@ -2104,6 +2497,10 @@ public static class ToLuaExport
                 if (list2[0].ParameterType == typeof(object))
                 {
                     return -1;
+                }
+                else if (list2[0].ParameterType.IsPrimitive)
+                {
+                    return 1;
                 }
 
                 list2.RemoveAt(0);
@@ -2118,6 +2515,14 @@ public static class ToLuaExport
                 else if (list1[i].ParameterType != typeof(object) && list2[i].ParameterType == typeof(object))
                 {
                     return -1;
+                }
+                else if (list1[i].ParameterType.IsPrimitive && !list2[i].ParameterType.IsPrimitive)
+                {
+                    return -1;
+                }
+                else if (!list1[i].ParameterType.IsPrimitive && list2[i].ParameterType.IsPrimitive)
+                {
+                    return 1;
                 }
                 else if (list1[i].ParameterType.IsPrimitive && list2[i].ParameterType.IsPrimitive)
                 {
@@ -3005,15 +3410,15 @@ public static class ToLuaExport
                 continue;
             }
 
-            if (p[i].Attributes != ParameterAttributes.Out)
-            {
-                list.Add(GetGenericBaseType(mb, p[i].ParameterType));
-            }
-            else
+            if (p[i].ParameterType.IsByRef && (p[i].Attributes & ParameterAttributes.Out) != ParameterAttributes.None)
             {
                 Type genericClass = typeof(LuaOut<>);
                 Type t = genericClass.MakeGenericType(p[i].ParameterType);
                 list.Add(t);
+            }
+            else
+            {
+                list.Add(GetGenericBaseType(mb, p[i].ParameterType));
             }
         }
 
@@ -3044,6 +3449,38 @@ public static class ToLuaExport
 
     static void GenGetFieldStr(string varName, Type varType, bool isStatic, bool isByteBuffer, bool beOverride = false)
     {
+
+        List<string> _symbols = null;
+        foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+        {
+            foreach (string s_key in entry.Value)
+            {
+                string[] parts = s_key.Split(',');
+                if (parts.Length == 2 && parts[0] == className && parts[1] == varName)
+                {
+                    _symbols = entry.Key;
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                break;
+            }
+        }
+        if (_symbols != null)
+        {
+            sb.Append("#if ");
+            for (int j = 0; j < _symbols.Count; j++)
+            {
+                sb.Append(_symbols[j]);
+                if (j != _symbols.Count - 1)
+                {
+                    sb.Append(" && ");
+                }
+            }
+            sb.AppendLine();
+        }
+
         sb.AppendLineEx("\r\n\t[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]");
         sb.AppendFormat("\tstatic int {0}_{1}(IntPtr L)\r\n", beOverride ? "_get" : "get", varName);
         sb.AppendLineEx("\t{");
@@ -3075,16 +3512,57 @@ public static class ToLuaExport
         }
 
         sb.AppendLineEx("\t}");
+
+
+        if (_symbols != null)
+        {
+            sb.AppendLine("#endif");
+        }
     }
 
     static void GenGetEventStr(string varName, Type varType)
     {
+        List<string> _symbols = null;
+        foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+        {
+            foreach (string s_key in entry.Value)
+            {
+                string[] parts = s_key.Split(',');
+                if (parts.Length == 2 && parts[0] == className && parts[1] == varName)
+                {
+                    _symbols = entry.Key;
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                break;
+            }
+        }
+        if (_symbols != null)
+        {
+            sb.Append("#if ");
+            for (int j = 0; j < _symbols.Count; j++)
+            {
+                sb.Append(_symbols[j]);
+                if (j != _symbols.Count - 1)
+                {
+                    sb.Append(" && ");
+                }
+            }
+            sb.AppendLine();
+        }
         sb.AppendLineEx("\r\n\t[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]");
         sb.AppendFormat("\tstatic int get_{0}(IntPtr L)\r\n", varName);
         sb.AppendLineEx("\t{");                
         sb.AppendFormat("\t\tToLua.Push(L, new EventObject(typeof({0})));\r\n",GetTypeStr(varType));
         sb.AppendLineEx("\t\treturn 1;");
         sb.AppendLineEx("\t}");
+
+        if (_symbols != null)
+        {
+            sb.AppendLine("#endif");
+        }
     }
 
     static void GenIndexFunc()
@@ -3129,6 +3607,37 @@ public static class ToLuaExport
 
     static void GenSetFieldStr(string varName, Type varType, bool isStatic, bool beOverride = false)
     {
+        List<string> _symbols = null;
+        foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+        {
+            foreach (string s_key in entry.Value)
+            {
+                string[] parts = s_key.Split(',');
+                if (parts.Length == 2 && parts[0] == className && parts[1] == varName)
+                {
+                    _symbols = entry.Key;
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                break;
+            }
+        }
+        if (_symbols != null)
+        {
+            sb.Append("#if ");
+            for (int j = 0; j < _symbols.Count; j++)
+            {
+                sb.Append(_symbols[j]);
+                if (j != _symbols.Count - 1)
+                {
+                    sb.Append(" && ");
+                }
+            }
+            sb.AppendLine();
+        }
+
         sb.AppendLineEx("\r\n\t[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]");
         sb.AppendFormat("\tstatic int {0}_{1}(IntPtr L)\r\n", beOverride ? "_set" : "set",  varName);        
         sb.AppendLineEx("\t{");        
@@ -3163,10 +3672,47 @@ public static class ToLuaExport
         }
         
         sb.AppendLineEx("\t}");
+
+
+        if (_symbols != null)
+        {
+            sb.AppendLine("#endif");
+        }
     }
 
     static void GenSetEventStr(string varName, Type varType, bool isStatic)
     {
+        List<string> _symbols = null;
+        foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+        {
+            foreach (string s_key in entry.Value)
+            {
+                string[] parts = s_key.Split(',');
+                if (parts.Length == 2 && parts[0] == className && parts[1] == varName)
+                {
+                    _symbols = entry.Key;
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                break;
+            }
+        }
+        if (_symbols != null)
+        {
+            sb.Append("#if ");
+            for (int j = 0; j < _symbols.Count; j++)
+            {
+                sb.Append(_symbols[j]);
+                if (j != _symbols.Count - 1)
+                {
+                    sb.Append(" && ");
+                }
+            }
+            sb.AppendLine();
+        }
+
         sb.AppendLineEx("\r\n\t[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]");
         sb.AppendFormat("\tstatic int set_{0}(IntPtr L)\r\n", varName);
         sb.AppendLineEx("\t{");
@@ -3205,6 +3751,11 @@ public static class ToLuaExport
         EndTry();
 
         sb.AppendLineEx("\t}");
+
+        if (_symbols != null)
+        {
+            sb.AppendLine("#endif");
+        }
     }
 
     static void GenNewIndexFunc()
@@ -3523,7 +4074,7 @@ public static class ToLuaExport
                 {
                     sb.AppendFormat("{2}\tfunc.PushByteBuffer(param{1});\r\n", push, i, head);
                 }
-                else if (pi[i].Attributes != ParameterAttributes.Out)
+                else if ((pi[i].Attributes & ParameterAttributes.Out) == ParameterAttributes.None)
                 {
                     sb.AppendFormat("{2}\tfunc.{0}(param{1});\r\n", push, i, head);
                 }
@@ -3723,7 +4274,7 @@ public static class ToLuaExport
             }
         }
 
-        fields = list.ToArray();                
+        fields = list.ToArray();
 
         sb.AppendLineEx("\tpublic static void Register(LuaState L)");
         sb.AppendLineEx("\t{");
@@ -3900,6 +4451,10 @@ public static class ToLuaExport
                 {
                     s2 = "out " + s2;
                 }
+                //else if (infos[i].Attributes == ParameterAttributes.In)
+                //{
+                //    s2 =  s2;
+                //}
                 else
                 {
                     s2 = "ref " + s2;
@@ -3940,14 +4495,14 @@ public static class ToLuaExport
     }
 
     static string GetDefaultDelegateBody(MethodInfo md)
-    {        
+    {
         string str = "\r\n\t\t\t{\r\n";
         bool flag = false;
         ParameterInfo[] pis = md.GetParameters();
 
         for (int i = 0; i < pis.Length; i++)
         {
-            if (pis[i].Attributes == ParameterAttributes.Out)
+            if ((pis[i].Attributes & ParameterAttributes.Out) != ParameterAttributes.None)
             {
                 str += string.Format("\t\t\t\tparam{0} = {1};\r\n", i, GetReturnValue(pis[i].ParameterType.GetElementType()));
                 flag = true;
@@ -4012,7 +4567,60 @@ public static class ToLuaExport
         {            
             string type = list[i].strType;
             string name = list[i].name;
+
+            List<string> _symbols = null; //宏定义
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    String s_name = s_key.Replace('.', '_');
+                    if (name.Contains(s_name))
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    String s_name = s_key.Replace(',', '_');
+                    if (s_name == name)
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                sb.Append("#if ");
+                for (int j = 0; j < _symbols.Count; j++)
+                {
+                    sb.Append(_symbols[j]);
+                    if (j != _symbols.Count - 1)
+                    {
+                        sb.Append(" && ");
+                    }
+                }
+                sb.AppendLine();
+            }
+
             sb.AppendFormat("\t\tdict.Add(typeof({0}), factory.{1});\r\n", type, name);            
+
+            if (_symbols != null)
+            {
+                sb.AppendLine("#endif");
+            }
         }
 
         sb.AppendLineEx();
@@ -4021,7 +4629,61 @@ public static class ToLuaExport
         {
             string type = list[i].strType;
             string name = list[i].name;            
+
+            List<string> _symbols = null; //宏定义
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    String s_name = s_key.Replace('.', '_');
+                    if (name.Contains(s_name))
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    String s_name = s_key.Replace(',', '_');
+                    if (s_name == name)
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                sb.Append("#if ");
+                for (int j = 0; j < _symbols.Count; j++)
+                {
+                    sb.Append(_symbols[j]);
+                    if (j != _symbols.Count - 1)
+                    {
+                        sb.Append(" && ");
+                    }
+                }
+                sb.AppendLine();
+            }
+            
             sb.AppendFormat("\t\tDelegateTraits<{0}>.Init(factory.{1});\r\n", type, name);                        
+
+            if (_symbols != null)
+            {
+                sb.AppendLine("#endif");
+            }
+
         }
 
         sb.AppendLineEx();
@@ -4029,8 +4691,62 @@ public static class ToLuaExport
         for (int i = 0; i < list.Length; i++)
         {
             string type = list[i].strType;
-            string name = list[i].name;            
+            string name = list[i].name;     
+
+            List<string> _symbols = null; //宏定义
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    String s_name = s_key.Replace('.', '_');
+                    if (name.Contains(s_name))
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    String s_name = s_key.Replace(',', '_');
+                    if (s_name == name)
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                sb.Append("#if ");
+                for (int j = 0; j < _symbols.Count; j++)
+                {
+                    sb.Append(_symbols[j]);
+                    if (j != _symbols.Count - 1)
+                    {
+                        sb.Append(" && ");
+                    }
+                }
+                sb.AppendLine();
+            }
+            
             sb.AppendFormat("\t\tTypeTraits<{0}>.Init(factory.Check_{1});\r\n", type, name);            
+
+            if (_symbols != null)
+            {
+                sb.AppendLine("#endif");
+            }
+
         }
 
         sb.AppendLineEx();
@@ -4039,7 +4755,60 @@ public static class ToLuaExport
         {
             string type = list[i].strType;
             string name = list[i].name;
+
+            List<string> _symbols = null; //宏定义
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    String s_name = s_key.Replace('.', '_');
+                    if (name.Contains(s_name))
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    String s_name = s_key.Replace(',', '_');
+                    if (s_name == name)
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                sb.Append("#if ");
+                for (int j = 0; j < _symbols.Count; j++)
+                {
+                    sb.Append(_symbols[j]);
+                    if (j != _symbols.Count - 1)
+                    {
+                        sb.Append(" && ");
+                    }
+                }
+                sb.AppendLine();
+            }
+            
             sb.AppendFormat("\t\tStackTraits<{0}>.Push = factory.Push_{1};\r\n", type, name);            
+
+            if (_symbols != null)
+            {
+                sb.AppendLine("#endif");
+            }
         }
 
         sb.Append("\t}\r\n");
@@ -4054,6 +4823,53 @@ public static class ToLuaExport
             MethodInfo mi = t.GetMethod("Invoke");
             string args = GetDelegateParams(mi);
 
+            List<string> _symbols = null; //宏定义
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    String s_name = s_key.Replace('.', '_');
+                    if (name.Contains(s_name))
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+            {
+                foreach (string s_key in entry.Value)
+                {
+                    String s_name = s_key.Replace(',', '_');
+                    if (s_name == name)
+                    {
+                        _symbols = entry.Key;
+                        break;
+                    }
+                }
+                if (_symbols != null)
+                {
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                sb.Append("#if ");
+                for (int j = 0; j < _symbols.Count; j++)
+                {
+                    sb.Append(_symbols[j]);
+                    if (j != _symbols.Count - 1)
+                    {
+                        sb.Append(" && ");
+                    }
+                }
+                sb.AppendLine();
+            }
+            
             //生成委托类
             sb.AppendFormat("\tclass {0}_Event : LuaDelegate\r\n", name);
             sb.AppendLineEx("\t{");
@@ -4100,6 +4916,11 @@ public static class ToLuaExport
             sb.AppendLineEx("\t{");
             sb.AppendLineEx("\t\tToLua.Push(L, o);");
             sb.AppendLineEx("\t}\r\n");
+
+            if (_symbols != null)
+            {
+                sb.AppendLine("#endif");
+            }
         }
 
         sb.AppendLineEx("}\r\n");        
@@ -4321,7 +5142,54 @@ public static class ToLuaExport
         string space = GetNameSpace(t, out funcName);
         funcName = CombineTypeStr(space, funcName);
         funcName = ConvertToLibSign(funcName);
-        
+
+        List<string> _symbols = null;
+        foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos)
+        {
+            foreach (string s_key in entry.Value)
+            {
+                String s_name = s_key.Replace('.', '_');
+                if (funcName.Contains(s_name))
+                {
+                    _symbols = entry.Key;
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                break;
+            }
+        }
+        foreach (KeyValuePair<List<string>, List<string>> entry in CustomSettings.conditionalCompilationSymbos_MethodOrProperty)
+        {
+            foreach (string s_key in entry.Value)
+            {
+                 String s_name = s_key.Replace(',', '_');
+                if (s_name == funcName)
+                {
+                    _symbols = entry.Key;
+                    break;
+                }
+            }
+            if (_symbols != null)
+            {
+                break;
+            }
+        }
+        if (_symbols != null)
+        {
+            sb.Append("#if ");
+            for (int j = 0; j < _symbols.Count; j++)
+            {
+                sb.Append(_symbols[j]);
+                if (j != _symbols.Count - 1)
+                {
+                    sb.Append(" && ");
+                }
+            }
+            sb.AppendLine();
+        }
+
         sb.AppendLineEx("\r\n\t[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]");
         sb.AppendFormat("\tstatic int {0}(IntPtr L)\r\n", funcName);
         sb.AppendLineEx("\t{");
@@ -4349,6 +5217,11 @@ public static class ToLuaExport
         sb.AppendLineEx("\t\t\treturn LuaDLL.toluaL_exception(L, e);");
         sb.AppendLineEx("\t\t}");
         sb.AppendLineEx("\t}");
+
+        if (_symbols != null)
+        {
+            sb.AppendLine("#endif");
+        }
     }    
 
     static void GenEventFunctions()

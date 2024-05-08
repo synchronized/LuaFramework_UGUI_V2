@@ -12,7 +12,7 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// Ìí¼ÓÒ»¸öÉùÒô
+        /// æ·»åŠ éŸ³é¢‘ç‰‡æ®µåˆ°soundsä¸­
         /// </summary>
         void Add(string key, AudioClip value) {
             if (sounds[key] != null || value == null) return;
@@ -20,7 +20,7 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// »ñÈ¡Ò»¸öÉùÒô
+        /// ä»soundsä¸­è·å–éŸ³é¢‘ç‰‡æ®µ
         /// </summary>
         AudioClip Get(string key) {
             if (sounds[key] == null) return null;
@@ -28,7 +28,7 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// ÔØÈëÒ»¸öÒôÆµ
+        /// åŠ è½½éŸ³é¢‘ç‰‡æ®µ
         /// </summary>
         public AudioClip LoadAudioClip(string path) {
             AudioClip ac = Get(path);
@@ -40,7 +40,7 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// ÊÇ·ñ²¥·Å±³¾°ÒôÀÖ£¬Ä¬ÈÏÊÇ1£º²¥·Å
+        /// æ˜¯å¦å¯ä»¥æ’­æ”¾èƒŒæ™¯éŸ³ä¹
         /// </summary>
         /// <returns></returns>
         public bool CanPlayBackSound() {
@@ -50,7 +50,7 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// ²¥·Å±³¾°ÒôÀÖ
+        /// æ’­æ”¾æˆ–è€…åœæ­¢èƒŒæ™¯éŸ³ä¹
         /// </summary>
         /// <param name="canPlay"></param>
         public void PlayBacksound(string name, bool canPlay) {
@@ -76,7 +76,7 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// ÊÇ·ñ²¥·ÅÒôĞ§,Ä¬ÈÏÊÇ1£º²¥·Å
+        /// æ˜¯å¦èƒ½æ’­æ”¾éŸ³æ•ˆ
         /// </summary>
         /// <returns></returns>
         public bool CanPlaySoundEffect() {
@@ -86,10 +86,10 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// ²¥·ÅÒôÆµ¼ô¼­
+        /// åœ¨æŒ‡å®šåœ°ç‚¹æ’­æ”¾
         /// </summary>
-        /// <param name="clip"></param>
-        /// <param name="position"></param>
+        /// <param name="clip">éŸ³é¢‘ç‰‡æ®µ</param>
+        /// <param name="position">åœ°ç‚¹</param>
         public void Play(AudioClip clip, Vector3 position) {
             if (!CanPlaySoundEffect()) return;
             AudioSource.PlayClipAtPoint(clip, position); 

@@ -33,7 +33,7 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// Æô¶¯¼ÆÊ±Æ÷
+        /// å¼€å§‹ä¸€ä¸ªå®šæ—¶å™¨
         /// </summary>
         /// <param name="interval"></param>
         public void StartTimer(float value) {
@@ -42,17 +42,16 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// Í£Ö¹¼ÆÊ±Æ÷
+        /// ç»“æŸå®šæ—¶å™¨
         /// </summary>
         public void StopTimer() {
             CancelInvoke("Run");
         }
 
         /// <summary>
-        /// Ìí¼Ó¼ÆÊ±Æ÷ÊÂ¼ş
+        /// æ·»åŠ å®šæ—¶å™¨äº‹ä»¶
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="o"></param>
+        /// <param name="info"></param>
         public void AddTimerEvent(TimerInfo info) {
             if (!objects.Contains(info)) {
                 objects.Add(info);
@@ -60,7 +59,7 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// É¾³ı¼ÆÊ±Æ÷ÊÂ¼ş
+        /// ç§»é™¤å®šæ—¶å™¨äº‹ä»¶
         /// </summary>
         /// <param name="name"></param>
         public void RemoveTimerEvent(TimerInfo info) {
@@ -70,7 +69,7 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// Í£Ö¹¼ÆÊ±Æ÷ÊÂ¼ş
+        /// åœæ­¢å®šæ—¶å™¨äº‹ä»¶
         /// </summary>
         /// <param name="info"></param>
         public void StopTimerEvent(TimerInfo info) {
@@ -80,7 +79,7 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// ¼ÌĞø¼ÆÊ±Æ÷ÊÂ¼ş
+        /// å›å¤å®šæ—¶å™¨äº‹ä»¶
         /// </summary>
         /// <param name="info"></param>
         public void ResumeTimerEvent(TimerInfo info) {
@@ -90,7 +89,7 @@ namespace LuaFramework {
         }
 
         /// <summary>
-        /// ¼ÆÊ±Æ÷ÔËĞĞ
+        /// å¯åŠ¨å®šæ—¶å™¨
         /// </summary>
         void Run() {
             if (objects.Count == 0) return;
@@ -101,7 +100,7 @@ namespace LuaFramework {
                 timer.TimerUpdate();
                 o.tick++;
             }
-            /////////////////////////Çå³ı±ê¼ÇÎªÉ¾³ıµÄÊÂ¼ş///////////////////////////
+            /////////////////////////ç§»é™¤å®šéœ€è¦åˆ é™¤çš„æ—¶å™¨///////////////////////////
             for (int i = objects.Count - 1; i >= 0; i--) {
                 if (objects[i].delete) { objects.Remove(objects[i]); }
             }

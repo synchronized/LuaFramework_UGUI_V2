@@ -10,8 +10,6 @@ public class UnityEngine_ShaderWrap
 		L.RegFunction("Find", Find);
 		L.RegFunction("EnableKeyword", EnableKeyword);
 		L.RegFunction("DisableKeyword", DisableKeyword);
-		L.RegFunction("IsKeywordEnabled", IsKeywordEnabled);
-		L.RegFunction("SetKeyword", SetKeyword);
 		L.RegFunction("WarmupAllShaders", WarmupAllShaders);
 		L.RegFunction("PropertyToID", PropertyToID);
 		L.RegFunction("GetDependency", GetDependency);
@@ -103,8 +101,7 @@ public class UnityEngine_ShaderWrap
 			{
 				UnityEngine.Rendering.GlobalKeyword arg0 = StackTraits<UnityEngine.Rendering.GlobalKeyword>.To(L, 1);
 				UnityEngine.Shader.EnableKeyword(arg0);
-				ToLua.PushValue(L, arg0);
-				return 1;
+				return 0;
 			}
 			else
 			{
@@ -134,64 +131,12 @@ public class UnityEngine_ShaderWrap
 			{
 				UnityEngine.Rendering.GlobalKeyword arg0 = StackTraits<UnityEngine.Rendering.GlobalKeyword>.To(L, 1);
 				UnityEngine.Shader.DisableKeyword(arg0);
-				ToLua.PushValue(L, arg0);
-				return 1;
+				return 0;
 			}
 			else
 			{
 				return LuaDLL.luaL_throw(L, "invalid arguments to method: UnityEngine.Shader.DisableKeyword");
 			}
-		}
-		catch (Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int IsKeywordEnabled(IntPtr L)
-	{
-		try
-		{
-			int count = LuaDLL.lua_gettop(L);
-
-			if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
-			{
-				string arg0 = ToLua.ToString(L, 1);
-				bool o = UnityEngine.Shader.IsKeywordEnabled(arg0);
-				LuaDLL.lua_pushboolean(L, o);
-				return 1;
-			}
-			else if (count == 1 && TypeChecker.CheckTypes<UnityEngine.Rendering.GlobalKeyword>(L, 1))
-			{
-				UnityEngine.Rendering.GlobalKeyword arg0 = StackTraits<UnityEngine.Rendering.GlobalKeyword>.To(L, 1);
-				bool o = UnityEngine.Shader.IsKeywordEnabled(arg0);
-				LuaDLL.lua_pushboolean(L, o);
-				ToLua.PushValue(L, arg0);
-				return 2;
-			}
-			else
-			{
-				return LuaDLL.luaL_throw(L, "invalid arguments to method: UnityEngine.Shader.IsKeywordEnabled");
-			}
-		}
-		catch (Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int SetKeyword(IntPtr L)
-	{
-		try
-		{
-			ToLua.CheckArgsCount(L, 2);
-			UnityEngine.Rendering.GlobalKeyword arg0 = StackTraits<UnityEngine.Rendering.GlobalKeyword>.Check(L, 1);
-			bool arg1 = LuaDLL.luaL_checkboolean(L, 2);
-			UnityEngine.Shader.SetKeyword(arg0, arg1);
-			ToLua.PushValue(L, arg0);
-			return 1;
 		}
 		catch (Exception e)
 		{
@@ -330,16 +275,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 2 && TypeChecker.CheckTypes<string, int>(L, 1))
+			if (count == 2 && TypeChecker.CheckTypes<int, int>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				int arg1 = (int)LuaDLL.lua_tonumber(L, 2);
 				UnityEngine.Shader.SetGlobalInt(arg0, arg1);
 				return 0;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, int>(L, 1))
+			else if (count == 2 && TypeChecker.CheckTypes<string, int>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				int arg1 = (int)LuaDLL.lua_tonumber(L, 2);
 				UnityEngine.Shader.SetGlobalInt(arg0, arg1);
 				return 0;
@@ -362,16 +307,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 2 && TypeChecker.CheckTypes<string, float>(L, 1))
+			if (count == 2 && TypeChecker.CheckTypes<int, float>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				float arg1 = (float)LuaDLL.lua_tonumber(L, 2);
 				UnityEngine.Shader.SetGlobalFloat(arg0, arg1);
 				return 0;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, float>(L, 1))
+			else if (count == 2 && TypeChecker.CheckTypes<string, float>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				float arg1 = (float)LuaDLL.lua_tonumber(L, 2);
 				UnityEngine.Shader.SetGlobalFloat(arg0, arg1);
 				return 0;
@@ -394,16 +339,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 2 && TypeChecker.CheckTypes<string, int>(L, 1))
+			if (count == 2 && TypeChecker.CheckTypes<int, int>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				int arg1 = (int)LuaDLL.lua_tonumber(L, 2);
 				UnityEngine.Shader.SetGlobalInteger(arg0, arg1);
 				return 0;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, int>(L, 1))
+			else if (count == 2 && TypeChecker.CheckTypes<string, int>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				int arg1 = (int)LuaDLL.lua_tonumber(L, 2);
 				UnityEngine.Shader.SetGlobalInteger(arg0, arg1);
 				return 0;
@@ -426,16 +371,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.Vector4>(L, 1))
+			if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.Vector4>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.Vector4 arg1 = ToLua.ToVector4(L, 2);
 				UnityEngine.Shader.SetGlobalVector(arg0, arg1);
 				return 0;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.Vector4>(L, 1))
+			else if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.Vector4>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				UnityEngine.Vector4 arg1 = ToLua.ToVector4(L, 2);
 				UnityEngine.Shader.SetGlobalVector(arg0, arg1);
 				return 0;
@@ -458,16 +403,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.Color>(L, 1))
+			if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.Color>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.Color arg1 = ToLua.ToColor(L, 2);
 				UnityEngine.Shader.SetGlobalColor(arg0, arg1);
 				return 0;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.Color>(L, 1))
+			else if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.Color>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				UnityEngine.Color arg1 = ToLua.ToColor(L, 2);
 				UnityEngine.Shader.SetGlobalColor(arg0, arg1);
 				return 0;
@@ -490,16 +435,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.Matrix4x4>(L, 1))
+			if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.Matrix4x4>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.Matrix4x4 arg1 = StackTraits<UnityEngine.Matrix4x4>.To(L, 2);
 				UnityEngine.Shader.SetGlobalMatrix(arg0, arg1);
 				return 0;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.Matrix4x4>(L, 1))
+			else if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.Matrix4x4>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				UnityEngine.Matrix4x4 arg1 = StackTraits<UnityEngine.Matrix4x4>.To(L, 2);
 				UnityEngine.Shader.SetGlobalMatrix(arg0, arg1);
 				return 0;
@@ -522,31 +467,31 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.Texture>(L, 1))
-			{
-				string arg0 = ToLua.ToString(L, 1);
-				UnityEngine.Texture arg1 = (UnityEngine.Texture)ToLua.ToObject(L, 2);
-				UnityEngine.Shader.SetGlobalTexture(arg0, arg1);
-				return 0;
-			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.Texture>(L, 1))
+			if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.Texture>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.Texture arg1 = (UnityEngine.Texture)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.SetGlobalTexture(arg0, arg1);
 				return 0;
 			}
-			else if (count == 3 && TypeChecker.CheckTypes<string, UnityEngine.RenderTexture, UnityEngine.Rendering.RenderTextureSubElement>(L, 1))
+			else if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.Texture>(L, 1))
 			{
 				string arg0 = ToLua.ToString(L, 1);
-				UnityEngine.RenderTexture arg1 = (UnityEngine.RenderTexture)ToLua.ToObject(L, 2);
-				UnityEngine.Rendering.RenderTextureSubElement arg2 = (UnityEngine.Rendering.RenderTextureSubElement)ToLua.ToObject(L, 3);
-				UnityEngine.Shader.SetGlobalTexture(arg0, arg1, arg2);
+				UnityEngine.Texture arg1 = (UnityEngine.Texture)ToLua.ToObject(L, 2);
+				UnityEngine.Shader.SetGlobalTexture(arg0, arg1);
 				return 0;
 			}
 			else if (count == 3 && TypeChecker.CheckTypes<int, UnityEngine.RenderTexture, UnityEngine.Rendering.RenderTextureSubElement>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				UnityEngine.RenderTexture arg1 = (UnityEngine.RenderTexture)ToLua.ToObject(L, 2);
+				UnityEngine.Rendering.RenderTextureSubElement arg2 = (UnityEngine.Rendering.RenderTextureSubElement)ToLua.ToObject(L, 3);
+				UnityEngine.Shader.SetGlobalTexture(arg0, arg1, arg2);
+				return 0;
+			}
+			else if (count == 3 && TypeChecker.CheckTypes<string, UnityEngine.RenderTexture, UnityEngine.Rendering.RenderTextureSubElement>(L, 1))
+			{
+				string arg0 = ToLua.ToString(L, 1);
 				UnityEngine.RenderTexture arg1 = (UnityEngine.RenderTexture)ToLua.ToObject(L, 2);
 				UnityEngine.Rendering.RenderTextureSubElement arg2 = (UnityEngine.Rendering.RenderTextureSubElement)ToLua.ToObject(L, 3);
 				UnityEngine.Shader.SetGlobalTexture(arg0, arg1, arg2);
@@ -570,16 +515,23 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.ComputeBuffer>(L, 1))
+			if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.ComputeBuffer>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.ComputeBuffer arg1 = (UnityEngine.ComputeBuffer)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.SetGlobalBuffer(arg0, arg1);
 				return 0;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.ComputeBuffer>(L, 1))
+			else if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.GraphicsBuffer>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				UnityEngine.GraphicsBuffer arg1 = (UnityEngine.GraphicsBuffer)ToLua.ToObject(L, 2);
+				UnityEngine.Shader.SetGlobalBuffer(arg0, arg1);
+				return 0;
+			}
+			else if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.ComputeBuffer>(L, 1))
+			{
+				string arg0 = ToLua.ToString(L, 1);
 				UnityEngine.ComputeBuffer arg1 = (UnityEngine.ComputeBuffer)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.SetGlobalBuffer(arg0, arg1);
 				return 0;
@@ -587,13 +539,6 @@ public class UnityEngine_ShaderWrap
 			else if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.GraphicsBuffer>(L, 1))
 			{
 				string arg0 = ToLua.ToString(L, 1);
-				UnityEngine.GraphicsBuffer arg1 = (UnityEngine.GraphicsBuffer)ToLua.ToObject(L, 2);
-				UnityEngine.Shader.SetGlobalBuffer(arg0, arg1);
-				return 0;
-			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.GraphicsBuffer>(L, 1))
-			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.GraphicsBuffer arg1 = (UnityEngine.GraphicsBuffer)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.SetGlobalBuffer(arg0, arg1);
 				return 0;
@@ -616,18 +561,27 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 4 && TypeChecker.CheckTypes<string, UnityEngine.ComputeBuffer, int, int>(L, 1))
+			if (count == 4 && TypeChecker.CheckTypes<int, UnityEngine.ComputeBuffer, int, int>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.ComputeBuffer arg1 = (UnityEngine.ComputeBuffer)ToLua.ToObject(L, 2);
 				int arg2 = (int)LuaDLL.lua_tonumber(L, 3);
 				int arg3 = (int)LuaDLL.lua_tonumber(L, 4);
 				UnityEngine.Shader.SetGlobalConstantBuffer(arg0, arg1, arg2, arg3);
 				return 0;
 			}
-			else if (count == 4 && TypeChecker.CheckTypes<int, UnityEngine.ComputeBuffer, int, int>(L, 1))
+			else if (count == 4 && TypeChecker.CheckTypes<int, UnityEngine.GraphicsBuffer, int, int>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				UnityEngine.GraphicsBuffer arg1 = (UnityEngine.GraphicsBuffer)ToLua.ToObject(L, 2);
+				int arg2 = (int)LuaDLL.lua_tonumber(L, 3);
+				int arg3 = (int)LuaDLL.lua_tonumber(L, 4);
+				UnityEngine.Shader.SetGlobalConstantBuffer(arg0, arg1, arg2, arg3);
+				return 0;
+			}
+			else if (count == 4 && TypeChecker.CheckTypes<string, UnityEngine.ComputeBuffer, int, int>(L, 1))
+			{
+				string arg0 = ToLua.ToString(L, 1);
 				UnityEngine.ComputeBuffer arg1 = (UnityEngine.ComputeBuffer)ToLua.ToObject(L, 2);
 				int arg2 = (int)LuaDLL.lua_tonumber(L, 3);
 				int arg3 = (int)LuaDLL.lua_tonumber(L, 4);
@@ -637,15 +591,6 @@ public class UnityEngine_ShaderWrap
 			else if (count == 4 && TypeChecker.CheckTypes<string, UnityEngine.GraphicsBuffer, int, int>(L, 1))
 			{
 				string arg0 = ToLua.ToString(L, 1);
-				UnityEngine.GraphicsBuffer arg1 = (UnityEngine.GraphicsBuffer)ToLua.ToObject(L, 2);
-				int arg2 = (int)LuaDLL.lua_tonumber(L, 3);
-				int arg3 = (int)LuaDLL.lua_tonumber(L, 4);
-				UnityEngine.Shader.SetGlobalConstantBuffer(arg0, arg1, arg2, arg3);
-				return 0;
-			}
-			else if (count == 4 && TypeChecker.CheckTypes<int, UnityEngine.GraphicsBuffer, int, int>(L, 1))
-			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.GraphicsBuffer arg1 = (UnityEngine.GraphicsBuffer)ToLua.ToObject(L, 2);
 				int arg2 = (int)LuaDLL.lua_tonumber(L, 3);
 				int arg3 = (int)LuaDLL.lua_tonumber(L, 4);
@@ -670,16 +615,23 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 2 && TypeChecker.CheckTypes<string, System.Collections.Generic.List<float>>(L, 1))
+			if (count == 2 && TypeChecker.CheckTypes<int, System.Collections.Generic.List<float>>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				System.Collections.Generic.List<float> arg1 = (System.Collections.Generic.List<float>)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.SetGlobalFloatArray(arg0, arg1);
 				return 0;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, System.Collections.Generic.List<float>>(L, 1))
+			else if (count == 2 && TypeChecker.CheckTypes<int, float[]>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				float[] arg1 = ToLua.ToNumberArray<float>(L, 2);
+				UnityEngine.Shader.SetGlobalFloatArray(arg0, arg1);
+				return 0;
+			}
+			else if (count == 2 && TypeChecker.CheckTypes<string, System.Collections.Generic.List<float>>(L, 1))
+			{
+				string arg0 = ToLua.ToString(L, 1);
 				System.Collections.Generic.List<float> arg1 = (System.Collections.Generic.List<float>)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.SetGlobalFloatArray(arg0, arg1);
 				return 0;
@@ -687,13 +639,6 @@ public class UnityEngine_ShaderWrap
 			else if (count == 2 && TypeChecker.CheckTypes<string, float[]>(L, 1))
 			{
 				string arg0 = ToLua.ToString(L, 1);
-				float[] arg1 = ToLua.ToNumberArray<float>(L, 2);
-				UnityEngine.Shader.SetGlobalFloatArray(arg0, arg1);
-				return 0;
-			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, float[]>(L, 1))
-			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				float[] arg1 = ToLua.ToNumberArray<float>(L, 2);
 				UnityEngine.Shader.SetGlobalFloatArray(arg0, arg1);
 				return 0;
@@ -716,16 +661,23 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 2 && TypeChecker.CheckTypes<string, System.Collections.Generic.List<UnityEngine.Vector4>>(L, 1))
+			if (count == 2 && TypeChecker.CheckTypes<int, System.Collections.Generic.List<UnityEngine.Vector4>>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				System.Collections.Generic.List<UnityEngine.Vector4> arg1 = (System.Collections.Generic.List<UnityEngine.Vector4>)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.SetGlobalVectorArray(arg0, arg1);
 				return 0;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, System.Collections.Generic.List<UnityEngine.Vector4>>(L, 1))
+			else if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.Vector4[]>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				UnityEngine.Vector4[] arg1 = ToLua.ToStructArray<UnityEngine.Vector4>(L, 2);
+				UnityEngine.Shader.SetGlobalVectorArray(arg0, arg1);
+				return 0;
+			}
+			else if (count == 2 && TypeChecker.CheckTypes<string, System.Collections.Generic.List<UnityEngine.Vector4>>(L, 1))
+			{
+				string arg0 = ToLua.ToString(L, 1);
 				System.Collections.Generic.List<UnityEngine.Vector4> arg1 = (System.Collections.Generic.List<UnityEngine.Vector4>)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.SetGlobalVectorArray(arg0, arg1);
 				return 0;
@@ -733,13 +685,6 @@ public class UnityEngine_ShaderWrap
 			else if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.Vector4[]>(L, 1))
 			{
 				string arg0 = ToLua.ToString(L, 1);
-				UnityEngine.Vector4[] arg1 = ToLua.ToStructArray<UnityEngine.Vector4>(L, 2);
-				UnityEngine.Shader.SetGlobalVectorArray(arg0, arg1);
-				return 0;
-			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.Vector4[]>(L, 1))
-			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.Vector4[] arg1 = ToLua.ToStructArray<UnityEngine.Vector4>(L, 2);
 				UnityEngine.Shader.SetGlobalVectorArray(arg0, arg1);
 				return 0;
@@ -762,16 +707,23 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 2 && TypeChecker.CheckTypes<string, System.Collections.Generic.List<UnityEngine.Matrix4x4>>(L, 1))
+			if (count == 2 && TypeChecker.CheckTypes<int, System.Collections.Generic.List<UnityEngine.Matrix4x4>>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				System.Collections.Generic.List<UnityEngine.Matrix4x4> arg1 = (System.Collections.Generic.List<UnityEngine.Matrix4x4>)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.SetGlobalMatrixArray(arg0, arg1);
 				return 0;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, System.Collections.Generic.List<UnityEngine.Matrix4x4>>(L, 1))
+			else if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.Matrix4x4[]>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				UnityEngine.Matrix4x4[] arg1 = ToLua.ToStructArray<UnityEngine.Matrix4x4>(L, 2);
+				UnityEngine.Shader.SetGlobalMatrixArray(arg0, arg1);
+				return 0;
+			}
+			else if (count == 2 && TypeChecker.CheckTypes<string, System.Collections.Generic.List<UnityEngine.Matrix4x4>>(L, 1))
+			{
+				string arg0 = ToLua.ToString(L, 1);
 				System.Collections.Generic.List<UnityEngine.Matrix4x4> arg1 = (System.Collections.Generic.List<UnityEngine.Matrix4x4>)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.SetGlobalMatrixArray(arg0, arg1);
 				return 0;
@@ -779,13 +731,6 @@ public class UnityEngine_ShaderWrap
 			else if (count == 2 && TypeChecker.CheckTypes<string, UnityEngine.Matrix4x4[]>(L, 1))
 			{
 				string arg0 = ToLua.ToString(L, 1);
-				UnityEngine.Matrix4x4[] arg1 = ToLua.ToStructArray<UnityEngine.Matrix4x4>(L, 2);
-				UnityEngine.Shader.SetGlobalMatrixArray(arg0, arg1);
-				return 0;
-			}
-			else if (count == 2 && TypeChecker.CheckTypes<int, UnityEngine.Matrix4x4[]>(L, 1))
-			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.Matrix4x4[] arg1 = ToLua.ToStructArray<UnityEngine.Matrix4x4>(L, 2);
 				UnityEngine.Shader.SetGlobalMatrixArray(arg0, arg1);
 				return 0;
@@ -808,16 +753,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
+			if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				int o = UnityEngine.Shader.GetGlobalInt(arg0);
 				LuaDLL.lua_pushinteger(L, o);
 				return 1;
 			}
-			else if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
+			else if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				int o = UnityEngine.Shader.GetGlobalInt(arg0);
 				LuaDLL.lua_pushinteger(L, o);
 				return 1;
@@ -840,16 +785,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
+			if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				float o = UnityEngine.Shader.GetGlobalFloat(arg0);
 				LuaDLL.lua_pushnumber(L, o);
 				return 1;
 			}
-			else if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
+			else if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				float o = UnityEngine.Shader.GetGlobalFloat(arg0);
 				LuaDLL.lua_pushnumber(L, o);
 				return 1;
@@ -872,16 +817,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
+			if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				int o = UnityEngine.Shader.GetGlobalInteger(arg0);
 				LuaDLL.lua_pushinteger(L, o);
 				return 1;
 			}
-			else if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
+			else if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				int o = UnityEngine.Shader.GetGlobalInteger(arg0);
 				LuaDLL.lua_pushinteger(L, o);
 				return 1;
@@ -904,16 +849,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
+			if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.Vector4 o = UnityEngine.Shader.GetGlobalVector(arg0);
 				ToLua.Push(L, o);
 				return 1;
 			}
-			else if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
+			else if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				UnityEngine.Vector4 o = UnityEngine.Shader.GetGlobalVector(arg0);
 				ToLua.Push(L, o);
 				return 1;
@@ -936,16 +881,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
+			if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.Color o = UnityEngine.Shader.GetGlobalColor(arg0);
 				ToLua.Push(L, o);
 				return 1;
 			}
-			else if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
+			else if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				UnityEngine.Color o = UnityEngine.Shader.GetGlobalColor(arg0);
 				ToLua.Push(L, o);
 				return 1;
@@ -968,16 +913,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
+			if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.Matrix4x4 o = UnityEngine.Shader.GetGlobalMatrix(arg0);
 				ToLua.PushValue(L, o);
 				return 1;
 			}
-			else if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
+			else if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				UnityEngine.Matrix4x4 o = UnityEngine.Shader.GetGlobalMatrix(arg0);
 				ToLua.PushValue(L, o);
 				return 1;
@@ -1000,16 +945,16 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
+			if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
 			{
-				string arg0 = ToLua.ToString(L, 1);
+				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.Texture o = UnityEngine.Shader.GetGlobalTexture(arg0);
 				ToLua.Push(L, o);
 				return 1;
 			}
-			else if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
+			else if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
 			{
-				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				string arg0 = ToLua.ToString(L, 1);
 				UnityEngine.Texture o = UnityEngine.Shader.GetGlobalTexture(arg0);
 				ToLua.Push(L, o);
 				return 1;
@@ -1032,30 +977,30 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
-			{
-				string arg0 = ToLua.ToString(L, 1);
-				float[] o = UnityEngine.Shader.GetGlobalFloatArray(arg0);
-				ToLua.Push(L, o);
-				return 1;
-			}
-			else if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
+			if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				float[] o = UnityEngine.Shader.GetGlobalFloatArray(arg0);
 				ToLua.Push(L, o);
 				return 1;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<string, System.Collections.Generic.List<float>>(L, 1))
+			else if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
 			{
 				string arg0 = ToLua.ToString(L, 1);
-				System.Collections.Generic.List<float> arg1 = (System.Collections.Generic.List<float>)ToLua.ToObject(L, 2);
-				UnityEngine.Shader.GetGlobalFloatArray(arg0, arg1);
-				return 0;
+				float[] o = UnityEngine.Shader.GetGlobalFloatArray(arg0);
+				ToLua.Push(L, o);
+				return 1;
 			}
 			else if (count == 2 && TypeChecker.CheckTypes<int, System.Collections.Generic.List<float>>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				System.Collections.Generic.List<float> arg1 = (System.Collections.Generic.List<float>)ToLua.ToObject(L, 2);
+				UnityEngine.Shader.GetGlobalFloatArray(arg0, arg1);
+				return 0;
+			}
+			else if (count == 2 && TypeChecker.CheckTypes<string, System.Collections.Generic.List<float>>(L, 1))
+			{
+				string arg0 = ToLua.ToString(L, 1);
 				System.Collections.Generic.List<float> arg1 = (System.Collections.Generic.List<float>)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.GetGlobalFloatArray(arg0, arg1);
 				return 0;
@@ -1078,30 +1023,30 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
-			{
-				string arg0 = ToLua.ToString(L, 1);
-				UnityEngine.Vector4[] o = UnityEngine.Shader.GetGlobalVectorArray(arg0);
-				ToLua.Push(L, o);
-				return 1;
-			}
-			else if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
+			if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.Vector4[] o = UnityEngine.Shader.GetGlobalVectorArray(arg0);
 				ToLua.Push(L, o);
 				return 1;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<string, System.Collections.Generic.List<UnityEngine.Vector4>>(L, 1))
+			else if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
 			{
 				string arg0 = ToLua.ToString(L, 1);
-				System.Collections.Generic.List<UnityEngine.Vector4> arg1 = (System.Collections.Generic.List<UnityEngine.Vector4>)ToLua.ToObject(L, 2);
-				UnityEngine.Shader.GetGlobalVectorArray(arg0, arg1);
-				return 0;
+				UnityEngine.Vector4[] o = UnityEngine.Shader.GetGlobalVectorArray(arg0);
+				ToLua.Push(L, o);
+				return 1;
 			}
 			else if (count == 2 && TypeChecker.CheckTypes<int, System.Collections.Generic.List<UnityEngine.Vector4>>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				System.Collections.Generic.List<UnityEngine.Vector4> arg1 = (System.Collections.Generic.List<UnityEngine.Vector4>)ToLua.ToObject(L, 2);
+				UnityEngine.Shader.GetGlobalVectorArray(arg0, arg1);
+				return 0;
+			}
+			else if (count == 2 && TypeChecker.CheckTypes<string, System.Collections.Generic.List<UnityEngine.Vector4>>(L, 1))
+			{
+				string arg0 = ToLua.ToString(L, 1);
 				System.Collections.Generic.List<UnityEngine.Vector4> arg1 = (System.Collections.Generic.List<UnityEngine.Vector4>)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.GetGlobalVectorArray(arg0, arg1);
 				return 0;
@@ -1124,30 +1069,30 @@ public class UnityEngine_ShaderWrap
 		{
 			int count = LuaDLL.lua_gettop(L);
 
-			if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
-			{
-				string arg0 = ToLua.ToString(L, 1);
-				UnityEngine.Matrix4x4[] o = UnityEngine.Shader.GetGlobalMatrixArray(arg0);
-				ToLua.Push(L, o);
-				return 1;
-			}
-			else if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
+			if (count == 1 && TypeChecker.CheckTypes<int>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
 				UnityEngine.Matrix4x4[] o = UnityEngine.Shader.GetGlobalMatrixArray(arg0);
 				ToLua.Push(L, o);
 				return 1;
 			}
-			else if (count == 2 && TypeChecker.CheckTypes<string, System.Collections.Generic.List<UnityEngine.Matrix4x4>>(L, 1))
+			else if (count == 1 && TypeChecker.CheckTypes<string>(L, 1))
 			{
 				string arg0 = ToLua.ToString(L, 1);
-				System.Collections.Generic.List<UnityEngine.Matrix4x4> arg1 = (System.Collections.Generic.List<UnityEngine.Matrix4x4>)ToLua.ToObject(L, 2);
-				UnityEngine.Shader.GetGlobalMatrixArray(arg0, arg1);
-				return 0;
+				UnityEngine.Matrix4x4[] o = UnityEngine.Shader.GetGlobalMatrixArray(arg0);
+				ToLua.Push(L, o);
+				return 1;
 			}
 			else if (count == 2 && TypeChecker.CheckTypes<int, System.Collections.Generic.List<UnityEngine.Matrix4x4>>(L, 1))
 			{
 				int arg0 = (int)LuaDLL.lua_tonumber(L, 1);
+				System.Collections.Generic.List<UnityEngine.Matrix4x4> arg1 = (System.Collections.Generic.List<UnityEngine.Matrix4x4>)ToLua.ToObject(L, 2);
+				UnityEngine.Shader.GetGlobalMatrixArray(arg0, arg1);
+				return 0;
+			}
+			else if (count == 2 && TypeChecker.CheckTypes<string, System.Collections.Generic.List<UnityEngine.Matrix4x4>>(L, 1))
+			{
+				string arg0 = ToLua.ToString(L, 1);
 				System.Collections.Generic.List<UnityEngine.Matrix4x4> arg1 = (System.Collections.Generic.List<UnityEngine.Matrix4x4>)ToLua.ToObject(L, 2);
 				UnityEngine.Shader.GetGlobalMatrixArray(arg0, arg1);
 				return 0;
