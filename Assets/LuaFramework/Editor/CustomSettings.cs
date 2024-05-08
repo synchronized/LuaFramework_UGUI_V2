@@ -153,7 +153,7 @@ public static class CustomSettings
 #if UNITY_2019
         _GT(typeof(SkinWeights)),
 #else
-        _GT(typeof(BlendWeights)),
+        _GT(typeof(SkinWeights)),
 #endif
         _GT(typeof(RenderTexture)), 
 		_GT(typeof(Resources)),      
@@ -200,7 +200,7 @@ public static class CustomSettings
 #if UNITY_2019
         typeof(SkinWeights),
 #else
-        typeof(BlendWeights),
+        typeof(SkinWeights),
 #endif
         typeof(RenderTexture),
         typeof(Rigidbody),

@@ -295,8 +295,12 @@ public static class ToLuaExport
                 else
                 {
                     Type genericClass = typeof(LuaOut<>);
-                    Type t = genericClass.MakeGenericType(args[i].ParameterType.GetElementType());
-                    list.Add(t);
+
+                    var argEleType = args[i].ParameterType.GetElementType();
+                    if (argEleType != null) {
+                        Type t = genericClass.MakeGenericType(argEleType);
+                        list.Add(t);
+                    }
                 }
             }
 
