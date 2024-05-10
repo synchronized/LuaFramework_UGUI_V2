@@ -2,15 +2,10 @@
 using System.Collections;
 using LuaFramework;
 
-public class Manager : Base, IManager {
+public class Manager : IManager {
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    public virtual void OnGameInit() {}
+    public virtual void OnGameStart() {}
+    public virtual void OnGameUpdate() {}
+    public virtual void OnGameDestroy() {}
 }

@@ -35,15 +35,13 @@ namespace LuaFramework {
         static Queue<ThreadEvent> events = new Queue<ThreadEvent>();
 
         delegate void ThreadSyncEvent(NotiData data);
-        private ThreadSyncEvent m_SyncEvent;
 
-        void Awake() {
-            m_SyncEvent = OnSyncEvent;
+        public override void OnGameInit() {
             thread = new Thread(OnUpdate);
         }
 
         // Use this for initialization
-        void Start() {
+        public override void OnGameStart() {
             thread.Start();
         }
 
@@ -55,15 +53,6 @@ namespace LuaFramework {
                 this.func = func;
                 events.Enqueue(ev);
             }
-        }
-
-        /// <summary>
-        /// 通知事件
-        /// </summary>
-        /// <param name="state"></param>
-        private void OnSyncEvent(NotiData data) {
-            if (this.func != null) func(data);  //回调逻辑层
-            facade.SendMessageCommand(data.evName, data.evParam); //通知View层
         }
 
         // Update is called once per frame
@@ -141,7 +130,7 @@ namespace LuaFramework {
         /// <summary>
         /// 应用程序退出
         /// </summary>
-        void OnDestroy() {
+        public override void OnGameDestroy() {
             thread.Abort();
         }
     }

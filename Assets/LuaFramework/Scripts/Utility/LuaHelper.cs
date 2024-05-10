@@ -26,21 +26,21 @@ namespace LuaFramework {
         /// 资源管理器
         /// </summary>
         public static ResourceManager GetResManager() {
-            return AppFacade.Instance.GetManager<ResourceManager>(ManagerName.Resource);
+            return GameManager.Instance.GetManager<ResourceManager>();
         }
 
         /// <summary>
         /// 网络管理器
         /// </summary>
         public static NetworkManager GetNetManager() {
-            return AppFacade.Instance.GetManager<NetworkManager>(ManagerName.Network);
+            return GameManager.Instance.GetManager<NetworkManager>();
         }
 
         /// <summary>
         /// 音乐管理器
         /// </summary>
         public static SoundManager GetSoundManager() {
-            return AppFacade.Instance.GetManager<SoundManager>(ManagerName.Sound);
+            return GameManager.Instance.GetManager<SoundManager>();
         }
 
 

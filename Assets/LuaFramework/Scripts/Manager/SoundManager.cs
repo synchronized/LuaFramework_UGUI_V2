@@ -7,7 +7,7 @@ namespace LuaFramework {
         private AudioSource audio;
         private Hashtable sounds = new Hashtable();
 
-        void Start() {
+        public override void OnGameStart() {
             audio = GetComponent<AudioSource>();
         }
 

@@ -9,7 +9,7 @@ namespace LuaFramework {
         private LuaLooper loop = null;
 
         // Use this for initialization
-        void Awake() {
+        public override void OnGameInit() {
             loader = new LuaLoader();
             lua = new LuaState();
             this.OpenLibs();
@@ -121,7 +121,8 @@ namespace LuaFramework {
             lua.LuaGC(LuaGCOptions.LUA_GCCOLLECT);
         }
 
-        public void Close() {
+
+        public void OnGameDestroy() {
             loop.Destroy();
             loop = null;
 

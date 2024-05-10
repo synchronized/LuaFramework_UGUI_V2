@@ -18,11 +18,7 @@ namespace LuaFramework {
             }
         }
 
-        void Awake() {
-            Init();
-        }
-
-        void Init() {
+        public override void OnGameInit() {
             SocketClient.OnRegister();
         }
 
@@ -30,7 +26,9 @@ namespace LuaFramework {
             CallMethod("Start");
         }
 
-        public void Unload() {
+        public void OnGameDestroy() {
+            SocketClient.OnRemove();
+            Debug.Log("~NetworkManager was destroy");
             CallMethod("Unload");
         }
 
@@ -51,7 +49,7 @@ namespace LuaFramework {
         /// <summary>
         /// 消费mEvents中的Command
         /// </summary>
-        void Update() {
+        public override void OnGameUpdate() {
             if (mEvents.Count > 0) {
                 while (mEvents.Count > 0) {
                     KeyValuePair<int, ByteBuffer> _event = mEvents.Dequeue();
@@ -72,14 +70,6 @@ namespace LuaFramework {
         /// </summary>
         public void SendMessage(ByteBuffer buffer) {
             SocketClient.SendMessage(buffer);
-        }
-
-        /// <summary>
-        /// 销毁
-        /// </summary>
-        new void OnDestroy() {
-            SocketClient.OnRemove();
-            Debug.Log("~NetworkManager was destroy");
         }
     }
 }

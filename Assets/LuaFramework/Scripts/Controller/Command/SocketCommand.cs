@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using LuaFramework;
 
-public class SocketCommand : ControllerCommand {
+public class SocketCommand : ICommand {
 
-    public override void Execute(IMessage message) {
+    public void Execute(IMessage message) {
         object data = message.Body;
         if (data == null) return;
         KeyValuePair<int, ByteBuffer> buffer = (KeyValuePair<int, ByteBuffer>)data;

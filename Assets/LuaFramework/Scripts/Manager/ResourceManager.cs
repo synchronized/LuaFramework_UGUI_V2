@@ -255,8 +255,6 @@ namespace LuaFramework {
         private AssetBundle shared, assetbundle;
         private Dictionary<string, AssetBundle> bundles;
 
-        void Awake() {
-        }
 
         /// <summary>
         /// 初始化
@@ -371,7 +369,7 @@ namespace LuaFramework {
         /// <summary>
         /// 销毁资源
         /// </summary>
-        void OnDestroy() {
+        public override void OnGameDestroy() {
             if (shared != null) shared.Unload(true);
             if (manifest != null) manifest = null;
             Debug.Log("~ResourceManager was destroy!");

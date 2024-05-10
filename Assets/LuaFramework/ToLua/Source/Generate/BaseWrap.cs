@@ -6,10 +6,6 @@ public class BaseWrap
 {
 	public static void Register(LuaState L)
 	{
-		L.BeginClass(typeof(Base), typeof(UnityEngine.MonoBehaviour));
-		L.RegFunction("__eq", op_Equality);
-		L.RegFunction("__tostring", ToLua.op_ToString);
-		L.EndClass();
 	}
 
 	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
